@@ -5,11 +5,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "products")
 public record Product(
-		@Id
-		String id,
-		String name,
-		double price,
-		String quality
-		) {
-
-}
+    @Id 
+    String id,
+    String name,
+    Double price,
+    String category
+) {}

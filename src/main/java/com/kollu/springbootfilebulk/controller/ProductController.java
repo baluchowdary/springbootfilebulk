@@ -1,16 +1,24 @@
 package com.kollu.springbootfilebulk.controller;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kollu.springbootfilebulk.model.Product;
 import com.kollu.springbootfilebulk.repository.ProductRepository;
@@ -19,43 +27,57 @@ import com.kollu.springbootfilebulk.repository.ProductRepository;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    private ProductRepository repository;
+	@Autowired
+	private JobLauncher jobLauncher;
+	@Autowired
+    private Job job;
+	@Autowired
+	private ProductRepository repository;
 
-    // CREATE
-    @PostMapping("/save")
-    public Product addProduct(@RequestBody Product product) {
-        return repository.save(product);
+//    public BatchController(JobLauncher jobLauncher, Job job) {
+//        this.jobLauncher = jobLauncher;
+//        this.job = job;
+//    }
+
+    @PostMapping("/upload")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file) throws Exception {
+        // Modern NIO Files API (JDK 11+)
+        Path path = Paths.get("data.csv");
+        Files.write(path, file.getBytes());
+
+        JobParameters params = new JobParametersBuilder()
+                .addLong("time", System.currentTimeMillis())
+                .toJobParameters();
+        
+        jobLauncher.run(job, params);
+        
+        // JDK 15+ Text Block for a clean response
+        return """
+               {
+                 "status": "Success",
+                 "message": "Bulk processing started for %s"
+               }
+               """.formatted(file.getOriginalFilename());
     }
-
-    // READ ALL
+    
     @GetMapping("/load")
-    public List<Product> getAllProducts() {
+    public List<Product> getAll() {
         return repository.findAll();
     }
-
-    // UPDATE
-    @PutMapping("/update/{id}")
-    public Product updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
-        return repository.findById(id)
-            .map(existingProduct -> {
-                // Create a new Record instance with updated values
-                Product updatedProduct = new Product(
-                    existingProduct.id(),      // Keep the original ID from the DB
-                    productDetails.name(),     // New name from request
-                    productDetails.price(),    // New price from request
-                    productDetails.quality()   // New quality from request
-                );
-                return repository.save(updatedProduct);
-            	//return repository.save(existingProduct.withName(productDetails.name()));
-            })
-            .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-    }
-
-    // DELETE
+    
+ // DELETE BY ID
     @DeleteMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable String id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         repository.deleteById(id);
-        return "Product deleted successfully";
+        return ResponseEntity.noContent().build();
     }
+    
+ // DELETE ALL (Bulk Clear)
+    @DeleteMapping("/clear")
+    public ResponseEntity<String> clearAll() {
+        repository.deleteAll();
+        return ResponseEntity.ok("Database Cleared");
+    }
+    
+    
 }

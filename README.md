@@ -14,3 +14,7 @@ DB UI
 products o/p
 
 <img width="1748" height="916" alt="image" src="https://github.com/user-attachments/assets/330ac97b-3b5f-45dc-8cf5-5656baf18c02" />
+
+
+Sequences
+<img width="1919" height="713" alt="image" src="https://github.com/user-attachments/assets/4efd7e97-104b-4b4f-82b8-baa206ff1ec5" />

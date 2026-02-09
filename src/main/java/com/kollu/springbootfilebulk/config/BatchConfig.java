@@ -5,6 +5,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -27,11 +28,19 @@ public class BatchConfig {
                 .resource(new FileSystemResource("data.csv")) // Ensure this file exists
                 .linesToSkip(1)
                 .delimited()
-                .delimiter(",")
+                .delimiter("|")
                 .names("id","name", "price", "category")
                 .targetType(Product.class)
                 .build();
     }
+	
+	 @Bean
+	    public ItemProcessor<Product, Product> processor() {
+	    	return item -> {
+	    		String upperCaseName = item.name().toUpperCase().trim();
+	    		return new Product(item.id(), upperCaseName, item.price(), item.category());
+	    	};
+	    }
 
     @Bean
     public MongoItemWriter<Product> writer(MongoTemplate mongoTemplate) {
@@ -48,14 +57,17 @@ public class BatchConfig {
                 .start(step1)
                 .build();
     }
+    //here, We are using 'PlatformTransactionManager' because of single node env
 
-    @Bean
+    @Bean 
     public Step step1(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                     FlatFileItemReader<Product> reader, MongoItemWriter<Product> writer) {
+                     FlatFileItemReader<Product> reader, ItemProcessor<Product, Product> processor, MongoItemWriter<Product> writer) {
         return new StepBuilder("step1", jobRepository)
                 .<Product, Product>chunk(10, transactionManager)
                 .reader(reader)
+                .processor(processor)
                 .writer(writer)
                 .build();
     }
+
 }

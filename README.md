@@ -18,3 +18,21 @@ products o/p
 
 Sequences
 <img width="1919" height="713" alt="image" src="https://github.com/user-attachments/assets/4efd7e97-104b-4b4f-82b8-baa206ff1ec5" />
+
+
+-> We are not able to create below Meta table on Standalone environment local system
+Sample batch_job_execution_context Document data below,
+
+
+{
+  "_id": ObjectId("654a1b2c3d4e5f6g7h8i9j0k"),
+  "job_execution_id": NumberLong(12345),
+  "serialized_context": {
+    "batch.taskletType": "org.springframework.batch.core.step.item.ChunkOrientedTasklet",
+    "batch.stepType": "org.springframework.batch.core.step.tasklet.TaskletStep",
+    "FlatFileItemReader.read.count": 40,
+    "FlatFileItemReader.read.count.max": 2147483647,
+    "batch.item.count": 40,
+    "batch.commit.count": 4
+  }
+}

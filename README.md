@@ -36,3 +36,15 @@ Sample batch_job_execution_context Document data below,
     "batch.commit.count": 4
   }
 }
+
+
+-> Sample data for 1000 records
+
+<img width="1827" height="966" alt="image" src="https://github.com/user-attachments/assets/30761f1f-7ce2-4236-b530-f858ab1a6989" />
+
+
+<img width="1587" height="796" alt="image" src="https://github.com/user-attachments/assets/9c5432cf-543e-4abe-9334-f72f501c7c88" />
+
+
+<img width="1619" height="761" alt="image" src="https://github.com/user-attachments/assets/80a7852e-d840-42dd-86d2-15a1bc726c8b" />
+

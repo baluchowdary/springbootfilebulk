@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.kollu.springbootfilebulk.model.Product;
-import com.kollu.springbootfilebulk.util.FileCleanupListener;
 import com.kollu.springbootfilebulk.util.ProductJobParameterReader;
 
 @Configuration
@@ -58,10 +57,10 @@ public class BatchConfig {
 
     // THIS IS THE BEAN THE CONTROLLER IS LOOKING FOR
     @Bean
-    public Job importJob(JobRepository jobRepository, Step step1, FileCleanupListener step2) {
+    public Job importJob(JobRepository jobRepository, Step step1) {
         return new JobBuilder("importJob", jobRepository)
                 .start(step1)
-                .listener(step2) //delete temp file step will execute after process step finish
+               // .listener(step2) //delete temp file step will execute after process step finish
                 .build();
     }
     //here, We are using 'PlatformTransactionManager' because of single node env
@@ -76,15 +75,5 @@ public class BatchConfig {
                 .writer(writer)
                 .build();
     }
-    
-//    //step2 - cleanup tempfiles
-//    @Bean
-//    public Step step2(JobRepository jobRepository, 
-//                            PlatformTransactionManager transactionManager, 
-//                            FileDeletionTasklet tasklet) {
-//        return new StepBuilder("step2", jobRepository)
-//                .tasklet(tasklet, transactionManager)
-//                .build();
-//    }
 
 }

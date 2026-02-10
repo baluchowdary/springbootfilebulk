@@ -2,6 +2,7 @@ package com.kollu.springbootfilebulk.controller;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.CompletableFuture;
 
@@ -87,7 +88,11 @@ public class ProductController {
 	    }
 
 	    // Proceed with creating temp file and launching the job... 
-	    Path tempFile = Files.createTempFile("uploadFile-", "-" + file.getOriginalFilename());
+	    Path projectTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "batch-uploads");
+	    Files.createDirectories(projectTempDir);
+	    Path tempFile = Files.createTempFile(projectTempDir, "uploadFile-", "-" + file.getOriginalFilename());
+	    
+	   // Path tempFile = Files.createTempFile("uploadFile-", "-" + file.getOriginalFilename());
 	    System.out.println("*********File stored at: " + tempFile.toAbsolutePath());
 	    Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
 		

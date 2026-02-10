@@ -63,8 +63,13 @@ public class BatchConfig {
                // .listener(step2) //delete temp file step will execute after process step finish
                 .build();
     }
+    
     //here, We are using 'PlatformTransactionManager' because of single node env
-
+    /*
+	 * Default behavior is now 'upsert' (update/save) because of @Id -> It will
+	 * useful to overcome data inconsistency when server crash while writing data
+	 * into MongoDB
+	 */
     @Bean 
     public Step step1(JobRepository jobRepository, PlatformTransactionManager transactionManager,
     		ProductJobParameterReader reader, ItemProcessor<Product, Product> processor, MongoItemWriter<Product> writer) {
@@ -73,7 +78,7 @@ public class BatchConfig {
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
-                .build();
+				.build();  
     }
 
 }

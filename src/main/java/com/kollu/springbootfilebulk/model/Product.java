@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "products")
 public record Product(
     @Id 
-    String id,
+    Long id,
     String name,
     Double price,
     String category

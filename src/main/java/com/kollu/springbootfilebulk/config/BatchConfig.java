@@ -8,31 +8,36 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.kollu.springbootfilebulk.model.Product;
 import com.kollu.springbootfilebulk.util.FileDeletionTasklet;
+import com.kollu.springbootfilebulk.util.ProductJobParameterReader;
 
 @Configuration
 public class BatchConfig {
 
+//	@Bean
+//    public FlatFileItemReader<Product> reader() {
+//        return new FlatFileItemReaderBuilder<Product>()
+//                .name("productReader")
+//                .resource(new FileSystemResource("")) // Ensure this file exists
+//                .linesToSkip(1)
+//                .delimited()
+//                .delimiter("|")
+//                .names("id","name", "price", "category")
+//                .targetType(Product.class)
+//                .build();
+//    }
+	
+	
+	//Writing custom reader step to capture filepath from controller, By default batch won't support with NoSQL DB
 	@Bean
-    public FlatFileItemReader<Product> reader() {
-        return new FlatFileItemReaderBuilder<Product>()
-                .name("productReader")
-                .resource(new FileSystemResource("data.csv")) // Ensure this file exists
-                .linesToSkip(1)
-                .delimited()
-                .delimiter("|")
-                .names("id","name", "price", "category")
-                .targetType(Product.class)
-                .build();
+    public ProductJobParameterReader reader() {
+        return new ProductJobParameterReader();
     }
 	
 	 @Bean
@@ -63,7 +68,7 @@ public class BatchConfig {
 
     @Bean 
     public Step step1(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                     FlatFileItemReader<Product> reader, ItemProcessor<Product, Product> processor, MongoItemWriter<Product> writer) {
+    		ProductJobParameterReader reader, ItemProcessor<Product, Product> processor, MongoItemWriter<Product> writer) {
         return new StepBuilder("step1", jobRepository)
                 .<Product, Product>chunk(10, transactionManager)
                 .reader(reader)

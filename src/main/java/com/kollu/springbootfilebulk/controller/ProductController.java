@@ -94,9 +94,12 @@ public class ProductController {
 		
 
 	    // Launch job in the background (Assuming jobLauncher is configured for async)
+	    //Here, Multiple users can upload file parallel - one thread allocate for each file upload process
+	    //setting fullfilepath to read from itemreder step
 	    CompletableFuture.runAsync(() -> {
 	        try {
 	            JobParameters params = new JobParametersBuilder()
+	            		.addString("tempFileFullPath", tempFile.toAbsolutePath().toString())
 	                    .addLong("time", System.currentTimeMillis())
 	                    .toJobParameters();
 	            jobLauncher.run(job, params);

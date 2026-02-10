@@ -74,7 +74,7 @@ public class BatchConfig {
     public Step step1(JobRepository jobRepository, PlatformTransactionManager transactionManager,
     		ProductJobParameterReader reader, ItemProcessor<Product, Product> processor, MongoItemWriter<Product> writer) {
         return new StepBuilder("step1", jobRepository)
-                .<Product, Product>chunk(10, transactionManager)
+                .<Product, Product>chunk(2, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)

@@ -14,13 +14,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class TempFileJanitor {
 
-    @Scheduled(cron = "0 0 */3 * * *") // Runs every 3 hours
+    @Scheduled(cron = "0 */1 * * * *") // Runs every 3 hours
     public void cleanOldTempFiles() {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
-        long fourHoursAgo = System.currentTimeMillis() - (4 * 60 * 60 * 1000);
-
-        try (Stream<Path> files = Files.walk(tempDir)) {
-            files.filter(path -> path.getFileName().toString().startsWith("upload-"))
+    	System.out.println("*******cleanOldTempFiles *********");
+       
+    	String tempRoot = System.getProperty("java.io.tmpdir");
+    	System.out.println("tempRoot====" + tempRoot); 
+    	Path tempDir = Paths.get(tempRoot, "batch-uploads");
+    	
+    	System.out.println("tempDir path: " + tempDir.toAbsolutePath());
+    	//It will check 30 min time spam
+        long fourHoursAgo = System.currentTimeMillis() - (30 * 60 * 1000);
+        try (Stream<Path> files = Files.walk(tempDir.toAbsolutePath())) {
+            files.filter(path -> path.getFileName().toString().startsWith("uploadFile-"))
                  .filter(path -> {
                      try {
                          return Files.getLastModifiedTime(path).toMillis() < fourHoursAgo;

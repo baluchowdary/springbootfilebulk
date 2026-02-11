@@ -48,3 +48,11 @@ Sample batch_job_execution_context Document data below,
 
 <img width="1619" height="761" alt="image" src="https://github.com/user-attachments/assets/80a7852e-d840-42dd-86d2-15a1bc726c8b" />
 
+Manually hitting below Rest call update the Meta Job status from STARTED to STOPPED
+
+
+
+Post -> http://localhost:9090/springbootfilebulk/admin/batch/stop/1
+
+
+<img width="1311" height="482" alt="image" src="https://github.com/user-attachments/assets/74c38c62-7c4a-489f-8160-f96044bf176a" />

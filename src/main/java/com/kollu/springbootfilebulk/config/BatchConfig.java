@@ -2,6 +2,9 @@ package com.kollu.springbootfilebulk.config;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.DuplicateJobException;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.support.ReferenceJobFactory;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -57,11 +60,26 @@ public class BatchConfig {
 
     // THIS IS THE BEAN THE CONTROLLER IS LOOKING FOR
     @Bean
-    public Job importJob(JobRepository jobRepository, Step step1) {
-        return new JobBuilder("importJob", jobRepository)
-                .start(step1)
-               // .listener(step2) //delete temp file step will execute after process step finish
-                .build();
+    public Job importJob(JobRepository jobRepository, Step step1, JobRegistry jobRegistry) {
+//        return new JobBuilder("importJob", jobRepository)
+//                .start(step1)
+//               // .listener(step2) //delete temp file step will execute after process step finish
+//                .build();
+    	
+    	 Job job = new JobBuilder("importJob", jobRepository)
+                 .start(step1)
+                // .listener(step2) //delete temp file step will execute after process step finish
+                 .build();
+        
+     // Manually push it into the registry
+        ReferenceJobFactory factory = new ReferenceJobFactory(job);
+        try {
+			jobRegistry.register(factory);
+		} catch (DuplicateJobException e) {
+			e.printStackTrace();
+		} 
+        
+        return job;
     }
     
     //here, We are using 'PlatformTransactionManager' because of single node env

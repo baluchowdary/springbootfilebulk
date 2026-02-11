@@ -1,9 +1,13 @@
 package com.kollu.springbootfilebulk.config;
 
 import org.bson.Document;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.MongoJobExplorerFactoryBean;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.MongoJobRepositoryFactoryBean;
@@ -21,7 +25,6 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.transaction.PlatformTransactionManager;
-
 @Configuration
 //public class MongoBatchConfig extends DefaultBatchConfiguration { kollu-This line for - MongoTransactionManager
 public class MongoBatchConfig {
@@ -75,6 +78,12 @@ public class MongoBatchConfig {
 
 		return converter;
 	}
+	
+	// 2. JobRegistry - Manually defined so it can be injected
+    @Bean
+    public JobRegistry jobRegistry() {
+        return new MapJobRegistry();
+    }
 
 	@Bean
 	public JobRepository jobRepository(MongoTemplate mongoTemplate, PlatformTransactionManager transactionManager)
@@ -126,4 +135,23 @@ public class MongoBatchConfig {
 //        return factoryBean.getObject();
 //    }
     
+	// 6. JobOperator - Now the JobRegistry will be found!
+    @Bean
+    public JobOperator jobOperator(JobExplorer jobExplorer, 
+                                   JobLauncher jobLauncher, 
+                                   JobRegistry jobRegistry, 
+                                   JobRepository jobRepository) {
+        SimpleJobOperator operator = new SimpleJobOperator();
+        operator.setJobExplorer(jobExplorer);
+        operator.setJobLauncher(jobLauncher);
+        operator.setJobRegistry(jobRegistry);
+        operator.setJobRepository(jobRepository);
+        return operator;
+    }
+	
+	// 7. Register Jobs automatically (Replacement for deprecated post-processor)
+//    @Bean
+//    public JobRegistrySmartEventListener jobRegistrySmartEventListener(JobRegistry jobRegistry) {
+//        return new JobRegistrySmartEventListener(jobRegistry);
+//    }
 }

@@ -117,7 +117,7 @@ public class ProductController {
 	}
     
     @GetMapping("/load")
-    public Page<Product> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
+    public Page<Product> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "1") int size) {
         return repository.findAll(PageRequest.of(page, size)); 
     }
     

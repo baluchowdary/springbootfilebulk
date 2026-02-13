@@ -1,0 +1,9 @@
+resilience4j:
+  circuitbreaker:
+    instances:
+      redisService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10          # Check the last 10 calls
+        failureRateThreshold: 50       # If 50% fail, open the circuit
+        waitDurationInOpenState: 30s   # Wait 30s before trying Redis again
+        permittedNumberOfCallsInHalfOpenState: 3

@@ -1,9 +1,6 @@
 package com.kollu.springbootfilebulk.controller;
 
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,19 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kollu.springbootfilebulk.model.JsonPage;
 import com.kollu.springbootfilebulk.model.Product;
 import com.kollu.springbootfilebulk.service.ProductService;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-
-	@Autowired
-	private JobLauncher jobLauncher;
-	@Autowired
-	private Job job;
-//	@Autowired
-//	private ProductRepository repository;
 
 	@Autowired
 	private ProductService productService;
@@ -85,7 +76,7 @@ public class ProductController {
 	}
 
 	@GetMapping("/load")
-	public Page<Product> getAll(@RequestParam(defaultValue = "0") int page,
+	public JsonPage getAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "1") int size) {
 		return productService.getFileData(page, size);
 

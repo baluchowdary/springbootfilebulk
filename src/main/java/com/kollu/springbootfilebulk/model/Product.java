@@ -9,5 +9,6 @@ public record Product(
     Long id,
     String name,
     Double price,
-    String category
+    String category,
+    int volume
 ) {}

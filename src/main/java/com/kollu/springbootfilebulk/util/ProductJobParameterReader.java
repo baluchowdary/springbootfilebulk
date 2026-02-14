@@ -4,6 +4,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.mapping.RecordFieldSetMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.core.io.FileSystemResource;
 
@@ -11,6 +12,8 @@ import com.kollu.springbootfilebulk.model.Product; // Ensure this path matches y
 
 public class ProductJobParameterReader extends FlatFileItemReader<Product> implements StepExecutionListener {
 
+	private final DelimitedLineTokenizer tokenizer;
+	
     public ProductJobParameterReader() {
         this.setName("productReader");
         
@@ -19,12 +22,31 @@ public class ProductJobParameterReader extends FlatFileItemReader<Product> imple
         this.setLinesToSkip(1);
         
         // Define how to map CSV lines to your Product object
+       // DefaultLineMapper<Product> lineMapper = new DefaultLineMapper<>();
+        
+        //DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+       // tokenizer.setDelimiter("|");
+       // tokenizer.setNames("id", "name", "price", "category"); // Match your CSV column headers
+        
+        this.tokenizer = new DelimitedLineTokenizer();
+        this.tokenizer.setDelimiter("|");
+        
+        
         DefaultLineMapper<Product> lineMapper = new DefaultLineMapper<>();
+        lineMapper.setLineTokenizer(tokenizer);
         
-        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
-        tokenizer.setDelimiter("|");
-        tokenizer.setNames("id", "name", "price", "category"); // Match your CSV column headers
+        RecordFieldSetMapper<Product> fieldSetMapper = new RecordFieldSetMapper<>(Product.class);
+        lineMapper.setFieldSetMapper(fieldSetMapper);
         
+        this.setLineMapper(lineMapper);
+        
+        this.setSkippedLinesCallback(line -> {
+            if (line != null && !line.isEmpty()) {
+                // Splits the header line by your delimiter and sets names automatically
+                String[] columnNames = line.split("\\|"); 
+                this.tokenizer.setNames(columnNames);
+            }
+        });
         
 		/*
 		 * BeanWrapperFieldSetMapper<Product> fieldSetMapper = new
@@ -33,17 +55,17 @@ public class ProductJobParameterReader extends FlatFileItemReader<Product> imple
         
         //commented above fieldSetMapper, why because i am using record class, fieldSetMapper support for normal model class
      // Manually map the fields to the Record constructor
-        lineMapper.setFieldSetMapper(fieldSet -> new Product(
-                fieldSet.readLong("id"),
-                fieldSet.readString("name"),
-                fieldSet.readDouble("price"),
-                fieldSet.readString("category")
-        ));
+//        lineMapper.setFieldSetMapper(fieldSet -> new Product(
+//                fieldSet.readLong("id"),
+//                fieldSet.readString("name"),
+//                fieldSet.readDouble("price"),
+//                fieldSet.readString("category")
+//        ));
         
-        lineMapper.setLineTokenizer(tokenizer);
+       // lineMapper.setLineTokenizer(tokenizer);
         //lineMapper.setFieldSetMapper(fieldSetMapper);
         
-        this.setLineMapper(lineMapper);
+       // this.setLineMapper(lineMapper);
     }
 
     @Override

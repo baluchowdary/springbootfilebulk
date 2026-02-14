@@ -1,5 +1,8 @@
 package com.kollu.springbootfilebulk.config;
 
+import java.lang.reflect.RecordComponent;
+import java.util.Arrays;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.DuplicateJobException;
@@ -42,15 +45,55 @@ public class BatchConfig {
         return new ProductJobParameterReader();
     }
 	
-	 @Bean
-	    public ItemProcessor<Product, Product> processor() {
-	    	return item -> {
-	    		String upperCaseName = item.name().toUpperCase().trim();
-	    		return new Product(item.id(), upperCaseName, item.price(), item.category());
-	    	};
-	    }
+	/*
+	 * @Bean public ItemProcessor<Product, Product> processor() { return item -> {
+	 * String upperCaseName = item.name().toUpperCase().trim(); return new
+	 * Product(item.id(), upperCaseName, item.price(), item.category()); }; }
+	 */
+	
+	
+	@Bean
+	public ItemProcessor<Product, Product> processor() {
+		return item -> {
+			String upperCaseName = item.name().toUpperCase().trim();
+			//return new Product(item.id(), upperCaseName, item.price(), item.category());
+			return updateRecord(item, "name", upperCaseName);
+		};
+	}
+	  
 
-    @Bean
+    private Product updateRecord(Product record, String fieldName, String newValue) {
+		
+    	try {
+            RecordComponent[] components = record.getClass().getRecordComponents();
+            Object[] values = new Object[components.length];
+
+            for (int i = 0; i < components.length; i++) {
+                // Check if this component is the one we want to update
+                if (components[i].getName().equals(fieldName)) {
+                    values[i] = newValue;
+                } else {
+                    // Access the current value using the record's accessor method
+                    values[i] = components[i].getAccessor().invoke(record);
+                }
+            }
+
+            // Identify the types of the constructor arguments
+            Class<?>[] argTypes = Arrays.stream(components)
+                                        .map(RecordComponent::getType)
+                                        .toArray(Class<?>[]::new);
+
+            // Call the canonical constructor to create the updated Product
+            return record.getClass()
+                         .getDeclaredConstructor(argTypes)
+                         .newInstance(values);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to dynamically update Product record", e);
+        }
+	}
+
+	@Bean
     public MongoItemWriter<Product> writer(MongoTemplate mongoTemplate) {
         return new MongoItemWriterBuilder<Product>()
                 .template(mongoTemplate)

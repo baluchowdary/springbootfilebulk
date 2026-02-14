@@ -78,6 +78,7 @@ public class ProductController {
 	@GetMapping("/load")
 	public JsonPage getAll(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "1") int size) {
+		System.out.println("*********Load method");
 		return productService.getFileData(page, size);
 
 	}

@@ -56,3 +56,13 @@ Post -> http://localhost:9090/springbootfilebulk/admin/batch/stop/1
 
 
 <img width="1311" height="482" alt="image" src="https://github.com/user-attachments/assets/74c38c62-7c4a-489f-8160-f96044bf176a" />
+
+Scenarios:
+
+-1> Db have Data, Redis cache have Data, application server UP --> Success
+
+
+-2> DB don't have data, Redis cache have previous session data, application down --> while restrt server we are cleaning the redis cache by using CacheWiper code --> Except resunt = Data not found
+
+
+-3> DB Have data, Redis cache server down, application UP --> when we are loading data, first request call will check Redis cache for some time later it will fetch from DB server ==> Expected result is loading data some time delay.
